@@ -1,0 +1,35 @@
+\chapter{Future Work}
+\vspace{-1.5cm}
+\textbf{Synthesizable Quad Port BRAM}\\
+Though the design of the quad port BRAM is correct, the synthesis tool
+detects the false condition of hold violation between two registers triggered by 
+two different clocks. This hold violation is then propagated to the 
+implementation stage and the layout tool fails to meet timing requirements. Even if the 
+hold condition is invalid the setup condition for the second register must be satisfied and hence we can not
+report the path as a false path. A proper solution must be found for this problem to be able to use
+time multiplexed BRAMs.
+\\
+
+\textbf{Integration with the On-Chip Processor}\\
+The current hardware implementation requires a wrapper testbench to feed the instruction and 
+input data. Porting the scheduler tool chain to the on-chip ARM core of the Zynq SoC
+can eliminate the need to generate additional BRAM coefficient files inputs and instructions.
+Also the results can be redirected easily because of the shared memory scape of the 
+processor and FPGA programable logic.
+\\
+
+\textbf{Column Group Based Schedule}\\
+Extracting fine grin parallelism provides significant gain over the coarse-grain solution
+but at the cost of pre-processing time. The level wise scheduling policy used by Nechma \cite{Nechma}
+is also interesting as it generates the schedule for each column one by one. We can define
+an intermediate approach where instead of looking at the entire graph we can generate a schedule
+for group of columns. The groups can be formed based on the level of the column node in the 
+symbolic analysis.
+\\
+
+\textbf{Automatic Generation of the Time-Multiplexed Multiplexers}\\
+The current implementation generates multiplexers without adding intermediate 
+registers to optimize the path delays. This is fine because of the smaller number
+of the processing elements used in this project. In order to increase number of processing
+units or BRAMs multiplexers must be pipelined. The path delay of the pipeline
+stage has to determined based on the target FPGA. 

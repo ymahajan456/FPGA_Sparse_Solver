@@ -1,0 +1,53 @@
+\documentclass[a4paper,12pt, oneside]{book}
+
+\usepackage{Styles/ddpThesis}
+
+\pagestyle{fancy}
+
+\renewcommand{\name}{Yogesh Mahajan}
+\renewcommand{\rollNo}{14D070022}
+\renewcommand{\guide}{Prof. Sachin Patkar}
+\renewcommand{\degree}{Master of Technology}
+\renewcommand{\department}{Department of Electrical Engineering}
+\renewcommand{\institute}{Indian Institute of Technology, Bombay}
+\renewcommand{\thesisTitle}{Parallel Sparse Matrix Solver for Circuit Simulation using FPGAs}
+\renewcommand{\thesisSubtitle}{M.Tech Project Report}
+
+\parindent 0pt
+\begin{document}
+% \linespread{1.5}
+\onehalfspacing
+\frontmatter
+\maketitle
+\thispagestyle{empty}
+\input{Approval/Approval.tex}
+\input{Abstract/Abstract.tex}
+
+\thispagestyle{empty} % No headers
+\tableofcontents
+\listoffigures
+\listoftables
+
+\input{Declaration/Declaration.tex}
+
+\mainmatter
+\thispagestyle{empty}
+\input{./Introduction/Introduction.tex}
+\input{./ReviewLit/ReviewLit.tex}
+\input{./Theory/Theory.tex}
+\input{./ParallelLU/ParallelLU.tex}
+\input{./Hardware/hardware.tex}
+\input{./Scheduler/Scheduler.tex}
+\input{Software/Software.tex}
+\input{./Results/Results.tex}
+\input{./Future/future.tex}
+
+\backmatter
+\pagenumbering{gobble}
+    % \listoffigures
+    % \listoftables
+
+\bibliographystyle{ieeetr}
+\bibliography{references}{}
+% \input{Acknowledgement/Acknowledgement.tex}
+\end{document}

@@ -1,0 +1,102 @@
+\section{Sparse Matrix Data Structures}
+Sparse matrices are characterized by a relatively few non-zero elements.
+This property can be leveraged to store and operate these matrices efficiently. 
+The three most popular sparse matrix storage formats are \textit{Triplet Format}, 
+\textit{Compressed Column Sparse} and \textit{Compressed Row Sparse}.
+Both time and memory space complexity off any sparse matrix operations are highly 
+dependent on the underlying storage format and hence it is very important to 
+carefully select the storage format depending on the operations to be performed.
+\\
+\\
+\textbf{Triplet Format}\\
+Triplet format is the simplest sparse matrix data structure consisting 
+lists of all the non-zero entries in the matrix and corresponding row and Column
+indices.
+\\
+\\
+\textbf{Compressed Column Sparse}\\
+Teh CCS format consists of 3 arrays. 1) an array of non-zero entries with all the 
+elements in the same column are listed one after the other 2) an array row indices 
+corresponding to all the non-zero elements and 3) an array of the pointers
+where each column starts.
+\\
+\\
+\textbf{Compressed Row Sparse}\\
+CRS is similar to the CCS structure. It consists a array of the row pointers instead of 
+the column pointers.
+\\
+\\
+\textbf{ELLPACK}\\
+The ELLPACK is a block based storage format and consists of two matrices, a data matrix
+and column index matrix. The size of both matrices is determined by the number of 
+rows and the maximum number of number of non-zero elements in all the rows.
+Additional zeros are appended in a row to have uniform row length. This increases the storage overhead and can be
+eliminated with the advanced format such as sliced ELLPACK format.
+\\
+\\
+The triplet format is simple to create but difficult to use in most sparse matrix
+algorithms because of the absence of ordering of the elements. CCS is the most 
+widely used format because of many sparse algorithms uses column frontend to proceed.
+Many sparse matrix libraries requires the row/column indices to appear in a ascending 
+order for the ease of access and simplicity, although it is non necessary.
+
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        $\begin{bmatrix}
+            5 &  0 & -5 &  0 & 6 \\
+            0 &  4 &  0 & -4 & 0 \\
+            2 &  0 &  0 &  0 & 0 \\
+            1 & -3 &  0 & -1 & 0 \\
+            0 &  0 & -2 &  0 & 3 \\
+        \end{bmatrix}$
+        \caption{Example Matrix}
+        \label{fig:sparseDS:example}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.5\textwidth}
+        \centering
+        \resizebox{\textwidth}{!}{\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|}
+            \hline
+            Values & 5 & -5 & 6 & 4 & -4 & 2 & - & -3 & -1 & -2 & 3 \\
+            \hline
+            Column Indices & 0 & 2 & 4 & 1 & 3 & 0 & 0 & 1 & 3 & 2 & 4 \\
+            \hline
+            Row Indices & 0 & 0 & 0 & 1 & 1 & 2 & 3 & 3 & 3 & 4 & 4 \\
+            \hline
+        \end{tabular}}
+        \caption{Triplet format}
+        \label{fig:sparseDS:triplet}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \resizebox{\textwidth}{!}{\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|}
+            \hline
+            Values & 5 & 2 & 1 & 4 & -3 & -5 &-2 & -4 & -1 & 6 & 3 \\
+            \hline
+            Row Indices & 0 & 2 & 3 & 1 & 3 & 0 & 4 & 1 & 3 & 0 & 4 \\
+            \hline
+            Column Pointers & \multicolumn{3}{c|}{0} & \multicolumn{2}{c|}{3} & \multicolumn{2}{c|}{5} & \multicolumn{2}{c|}{7} & \multicolumn{2}{c|}{9} \\
+            \hline
+        \end{tabular}}
+        \caption{Compresses Column Sparse}
+        \label{fig:sparseDS:ccs}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \resizebox{\textwidth}{!}{\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|}
+            \hline
+            Values & 5 & -5 & 6 & 4 & -4 & 2 & - & -3 & -1 & -2 & 3 \\
+            \hline
+            Column Indices & 0 & 2 & 4 & 1 & 3 & 0 & 0 & 1 & 3 & 2 & 4 \\
+            \hline
+            Row Pointers & \multicolumn{3}{c|}{0} & \multicolumn{2}{c|}{3} & \multicolumn{2}{c|}{5} & \multicolumn{2}{c|}{6} & \multicolumn{2}{c|}{9} \\
+            \hline
+        \end{tabular}}
+        \caption{Compresses Row Sparse}
+        \label{fig:sparseDS:ccs}
+    \end{subfigure}
+    \caption{Storage formats for sparse matrices}
+    \label{fig:sparseDS:formatsExample}
+\end{figure}

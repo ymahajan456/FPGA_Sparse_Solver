@@ -1,0 +1,7 @@
+set_property PACKAGE_PIN L16 [get_ports CLK_IN]
+set_property PACKAGE_PIN R18 [get_ports RST_IN]
+set_property IOSTANDARD LVCMOS33 [get_ports RST_IN]
+set_property IOSTANDARD LVCMOS33 [get_ports CLK_LOCKED]
+set_property IOSTANDARD LVCMOS33 [get_ports COMPLETED]
+set_property PACKAGE_PIN G14 [get_ports COMPLETED]
+set_property PACKAGE_PIN D18 [get_ports CLK_LOCKED]

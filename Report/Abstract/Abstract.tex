@@ -1,0 +1,21 @@
+\begin{Abstract}
+\noindent
+Solving the sparse linear system is one of the most critical steps in many 
+scientific applications such as circuit simulation, power system modeling, 
+and computer vision. These operations, especially circuit simulations, are iterative 
+in nature and require tens of thousands of sparse system solves. The circuit simulation 
+consists of two phases per iteration: model evaluation followed by asymmetric sparse linear system solve. 
+The model evaluation phase is highly parallelizable unlike the subsequent phase, 
+which involves highly sparse and circuit dependent asymmetric matrices. The 
+project presents a scalable FPGA based LU solver system geared towards the 
+matrices that arise in circuit simulations. 
+The project leverages the fact that the structure of the sparse system remain 
+the same during the entire simulation and hence can be analyzed symbolically 
+only once to generate an execution schedule and use it for further iterations.
+The project integrates static pivoting and symbolic analysis to generate task graph which is the 
+scheduled using the priority list based ASAP strategy. The software toolchain 
+also provides option to generate and synthesize the required hardware. 
+
+% \afterpage{\blankpage}
+% \clearpage
+\end{Abstract}

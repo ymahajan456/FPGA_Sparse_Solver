@@ -1,0 +1,181 @@
+\section{Scheduling}
+
+The scheduling algorithm has to generate an execution schedule considering 
+the hardware constraints and data dependencies. Since the hardware does not have
+any dynamic problem handling capabilities the schedule generated must be 
+cycle accurate and static. The scheduler uses ASAP strategy to assign the execution nodes.
+A priority list is used to select the nodes from the pool of ready nodes. The priority
+of the nodes is defined as:
+
+\begin{equation}
+    \centering
+    Priority(n) = \sum_{i \in Parents(n)} Priority(i) + \sum_{x \in tasks(n)} Delay(x)
+\end{equation}
+
+where $Parents(n)$ is the set of nodes which are dependent on the node $n$ and $tasks(n)$ is the 
+set of operations required to evaluate the node $n$. This definition of the priority 
+ensures that the node which has more number of overall dependent nodes will be prioritized
+by the greedy scheduling algorithm.
+The important steps in the algorithm are as follows:
+
+\begin{algorithm}
+    \caption{Priority List based Scheduling Process}
+        \label{algo:sch:sch}
+    \begin{algorithmic}[1]
+        \Require{$G$, a computation flow graph for LU decomposition}
+        \Statex
+        \State $scheduledNodes := 0$
+        \State $readyNodes := G.leaves()$
+        \While{$scheduledNodes < G.size()$}
+            \State Update status of nodes retired in previous cycle
+            \State Update scheduledNodes
+            \State Update the ready nodes list
+            \State Assign memory port to retiring nodes
+            \State Calculate the free BRAM ports for reading and writing
+            \State Select the most prior set of ready nodes which can be schedules in current cycle
+            \State Assign the memory memory operations
+        \EndWhile
+    \end{algorithmic}
+\end{algorithm}
+
+\subsection{Finding Schedulable nodes}
+The scheduler maintains two boolean state variables corresponding namely, $Dirty$ and $Done$ for each of the nodes. 
+The set states of these variables indicate the following:
+\begin{description}
+    \item[$Dirty$]: The memory data corresponding to the node is outdated and must not be read
+    \item[$Done$]: All the computations corresponding to node are done
+\end{description}
+The set state of $Done$ variable does not indicate that the data in the memory is accurate. $Dirty$ variable must be 
+checked before accessing the data. These state variables ensure that the data being read always correct and also 
+helps scheduler to properly manage the dependencies. At the start of each cycle, the scheduler 
+has to find the set of ready nodes which can potentially form the execution assignment set for the cycle. such nodes 
+are called as ready nodes.\\
+The node is called ready when:
+\begin{description}
+    \item[MAC Node]: (Augend is not dirty or live) and at least one of addend pair of multiplicands is in done state.
+    \item[Divide Node]: Both the operands must be in the done state. 
+\end{description}
+Since the ready state of nodes depends on the state of children nodes. This list is updates using the set 
+of retiring nodes as they are fewer in number and anyway have to visited to generate write commands. \\
+
+The schedular also maintains a list called as \textbf{Live Variables}, which represents the set of 
+nodes whose correct values are available on the output ports of the PEs or BRAMs and hence can be 
+read in current cycle. \\
+
+Not all the nodes in the ready nodes are schedulable in current cycle. Some of operands 
+corresponding the ready nodes may be dirty and hence have to removed from the 
+schedulable node list. The list of live variables and the dirty state of operands is checked to
+ensure the schedulability of individual the nodes. 
+
+
+\subsection{Scheduling Table}
+The scheduling algorithm uses a set of three tables (figure \ref{fig:sch:tableBlank}), assignment table, retirement table and 
+memory operation table to keep track of all the assigned operation and determine the next set 
+assignments. The schedular generates cycle accurate simulation and stores the assignments as
+a set of instructions for the hardware. The top row of each table represents the current assignments
+for each port. The tables are used to determine the future assignments. \\
+
+\begin{figure}
+    \centering
+    \includegraphics[width = \linewidth]{./Scheduler/schedulartable.pdf}
+    \caption{Resource allocation tables used by schedular}
+    \label{fig:sch:tableBlank}
+\end{figure}
+
+\textbf{Assignment Table}: \\
+The top row of the assignment table represents the operations to be assigned at current cycle.
+All the operation scheduled in a cycle must stored in the same cycle they retire because of unavailability 
+of the output buffer. So the duplicate entries of the assigned operations are maid in the corresponding
+retirement table cell. The top row of the table can be used to eliminate unnecessary writing of intermediate
+results. \\
+
+\textbf{Retirement Table}: \\
+The top row of the retirement represents the operations retiring in the current cycle i.e. operations
+whose results are available on the ooutput ports of PEs. These results must be written to the memory except in the case of 
+write cancellation. \\
+\pagebreak
+
+\textbf{Memory Operation Table} \\
+Memory operation table maintains the record of available ports and assigned operations. 
+Operations are assigned to particular BRAM from the 0th port (time multiplexed ports 
+are numbered from $0-(n-1)$) first order. The top row of the table indicates the memory 
+operations in the current cycle.\\
+
+\textbf{Selecting the set of assignments} \\
+All the schedulable nodes are stored in the priority list in decreasing order. All combinations of nodes are 
+checked for availability of BRAM ports for both reading and retirement. A valid combination with
+highest sum of priorities is selected as assignments for the current cycle. Since this is the most
+complex process (in therms of time complexity) and is in the critical path of the algorithm the size 
+of the priority list is restricted to 100. 
+
+
+
+
+\subsection{An Example of Scheduling Process}
+Lets say at some clock cycle the nodes $n1_0$, $n2_0$, $n3_d$ are retiring 
+and the nodes $n2_1$, $n4_d$, $n5_d$ are being assigned to the PEs. The BRAMs have read latency of two.
+The schedulable list of nodes in the second next cycle can be calculated based on the current retiring nodes
+and contains nodes $n6_2$, $n7_d$, $n8_d$, $n9_0$, $n10_0$
+
+\begin{figure}
+    \centering
+    \includegraphics[width = \linewidth]{./Scheduler/exampleWrite.pdf}
+    \caption{Selecting write ports}
+    \label{fig:sch:exampleWrite}
+\end{figure}
+
+\textbf{Assigning Write Ports} \\
+(Refer figure \ref{fig:sch:exampleWrite})
+\begin{enumerate}
+    \item Retiring nodes: $n1_0$, $n2_0$, $n3_d$
+    \item Scheduled nodes: $n2_1$, $n4_d$, $n5_d$
+    \item Scheduled node $n2_1$ utilizes the intermediate result generated from operation $n2_0$, hence the 
+        write operation correspond to $n2_0$ can be eliminated. Hence the schedular has to reserve 
+        only two write operations for remaining nodes $n1_0$ and $n3_d$.
+    \item Now we can calculate free BRAM ports for read operations.
+    \item Also we know the delay of each operation and hence determine calculate free PEs
+        to assign operations.
+\end{enumerate}
+
+\begin{figure}
+    \centering
+    \includegraphics[width = 0.8\linewidth]{./Scheduler/examplePortSelection.pdf}
+    \caption{Selecting operations}
+    \label{fig:sch:exampleSelectPorts}
+\end{figure}
+
+\textbf{Operation Selection} \\
+The figure \ref{fig:sch:exampleSelectPorts} shows 5 ready nodes and available ports.
+The required number of read and write ports corresponding to each node for each BRAM are listed 
+in the adjoining tables. A valid group of operations must have sum of ports required by selected nodes
+should be less than total available nodes. The set with maximum sum of priorities
+is assigned to to PEs in current scheduling cycle. In this case $n7_d$, $n8_d$, $n9_0$ and $n10_0$
+forms the valid group and hence will be assigned at the bottom of the assignment table confirming the assignment in 
+the second next clock cycle.
+\\
+
+
+
+\textbf{Memory Read Assignment}\\
+One the assignments for the second next clock cycle ae decided, the additional 
+required data values are set to be read from the corresponding memory locations in the
+bottom row of the read allocation table.
+
+\begin{figure}
+    \centering
+    \includegraphics[width = \linewidth]{./Scheduler/exampleFinal.pdf}
+    \caption{Final allocation}
+    \label{fig:sch:exampleFinal}
+\end{figure}
+
+\textbf{Saving the Schedule} \\
+Figure \ref{fig:sch:exampleFinal} shows the final allocation of the resources. 
+All the non-zero allocations in the top row of each table are 
+saved in the schedule vector. The table entries are then cleared. 
+The tables ae stored as the two dimensional vector of structures. To avoid the huge amount
+of memory relocation due to addition and deletion of new entries, the table indices
+are accessed in rolling fashion i.e. the actual vector index for table at particular
+cloak cycle is given by
+$$
+Vector\ Index  = (Table\ Index + Clock\ Cycle) \% Depth\ of\ Table
+$$
